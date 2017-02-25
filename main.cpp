@@ -1,10 +1,9 @@
-#include <iostream>
 #include "string.h"
 
 using namespace mipt;
 
 int main() {
-	String s1("Hello");
+	String s1("Helloe");
 	String s2 = s1;
 	std::cout << "s1 : " << s1 << std::endl;
 	std::cout << "s2 : " << s2 << std::endl;
@@ -13,13 +12,16 @@ int main() {
 	(s1 + s2).print();
 	(s1 + 'c').print();
 	(s1 + "bans").print();
-	("bans" + s1).print();
+	std::cout << "bans" + s1 << std::endl;
 	String s3 = "hahfdhg";
 	std::cout << "s3 : " << s3 << std::endl;
 	char *ch = s1;
 	std::cout << "char * ch = " << ch << std::endl;
-	String s5;
-	std::cout << "enter your string(max 100 char) : " << std::endl;
+	int cap;
+	std::cout << "enter number of chars : " << std::endl;
+	std::cin >> cap;
+	String s5(cap + 1);
+	std::cout << "enter your string : " << std::endl;
 	std::cin >> s5;
 	std::cout << "your string is : " << s5 << std::endl;
 	String s6("a");

@@ -1,9 +1,8 @@
-#include <iostream>
 #include "string.h"
 
-mipt::String::String() {
-	values = new char[101];
-	capacity = 101;
+mipt::String::String(int cap) {
+	values = new char[cap];
+	capacity = cap;
 	values[0] = 0;
 }
 
@@ -16,11 +15,10 @@ mipt::String::String(const char *temp) {
 }
 
 mipt::String::String(const String &that) {
-	this->capacity = that.capacity;
-	this->values = new char[that.capacity];
-	for (int i = 0; i < that.capacity; i++) {
-		this->values[i] = that.values[i];
-	}
+	this->capacity = that.size() + 1;
+	this->values = new char[that.size() + 1];
+	std::memcpy(values, that.values, that.size());
+	this->values[that.size()] = 0;
 }
 
 mipt::String::~String() {
@@ -28,9 +26,7 @@ mipt::String::~String() {
 }
 
 void mipt::String::print() {
-	for (int i = 0; i < size(); i++) {
-		std::cout << values[i];
-	}
+	std::cout << this->values;
 	std::cout << std::endl;
 }
 
@@ -43,13 +39,14 @@ size_t mipt::String::find(const char temp) {
 	for (int i = 0; i < size(); i++) {
 		if (values[i] == temp) {
 			res = i;
+			break;
 		}
 	}
 	return res;
 }
 
-void mipt::String::resize() {
-	char *temp = new char[this->capacity * 2];
+void mipt::String::resize(int newcapacity) {
+	char *temp = new char[newcapacity];
 	for (int i = 0; i < this->size(); i++) {
 		temp[i] = this->values[i];
 	}
@@ -60,8 +57,8 @@ void mipt::String::resize() {
 }
 
 mipt::String &mipt::String::append(const char temp) {
-	while (this->capacity < 1 + this->size() + 1) {
-		this->resize();
+	if (this->capacity < 1 + this->size() + 1) {
+		this->resize(this->size() + 2);
 	}
 	this->values[this->size() + 1] = 0;
 	this->values[this->size()] = temp;
@@ -70,28 +67,17 @@ mipt::String &mipt::String::append(const char temp) {
 
 mipt::String &mipt::String::append(const char *temp) {
 	int length = strlen(temp);
-	while (this->capacity < length + this->size() + 1) {
-		this->resize();
+	if (this->capacity < length + this->size() + 1) {
+		this->resize(length + this->size() + 1);
 	}
 	size_t this_length = this->size();
-	for (int i = this_length; i < length + this_length; i++) {
-		this->values[i] = temp[i - this_length];
-	}
+	std::memcpy(this->values + this_length, temp, length);
 	this->values[length + this_length] = 0;
 	return *this;
 }
 
 mipt::String &mipt::String::append(const String &that) {
-	int that_length = that.size();
-	while (this->capacity < that_length + this->size() + 1) {
-		this->resize();
-	}
-	size_t this_length = this->size();
-	for (int i = this_length; i < that_length + this_length; i++) {
-		this->values[i] = that.values[i - this_length];
-	}
-	this->values[that_length + this_length] = 0;
-	return *this;
+	return append(that.values);
 }
 
 mipt::String mipt::String::substring(size_t start, size_t finish) const {
@@ -99,64 +85,31 @@ mipt::String mipt::String::substring(size_t start, size_t finish) const {
 		finish = this->size() - 1;
 	}
 	char *res = new char[finish - start + 2];
-	for (int i = start; i <= finish; i++) {
-		res[i - start] = this->values[i];
-	}
+	memcpy(res, this->values + start, finish - start + 1);
 	res[finish - start + 1] = 0;
 	String result(res);
 	return result;
 }
 
 mipt::String mipt::String::operator+(const String &that) const {
-	char *line = new char[this->size() + that.size() + 1];
-	for (int i = 0; i < this->size(); i++) {
-		line[i] = this->values[i];
-	}
-	for (int i = this->size(); i < this->size() + that.size(); i++) {
-		line[i] = that.values[i - this->size()];
-	}
-	line[this->size() + that.size()] = 0;
-	String result(line);
-	return result;
+	String res(*this);
+	res.append(that);
+	return res;
 }
 
 mipt::String mipt::String::operator+(const char *temp) const {
-	int length = strlen(temp);
-	char *line = new char[this->size() + length + 1];
-	for (int i = 0; i < this->size(); i++) {
-		line[i] = this->values[i];
-	}
-	for (int i = this->size(); i < this->size() + length; i++) {
-		line[i] = temp[i - this->size()];
-	}
-	line[this->size() + length] = 0;
-	String result(line);
-	return result;
+	String b(temp);
+	return (*this + b);
 }
 
 mipt::String mipt::String::operator+(const char symbol) const {
-	char *line = new char[capacity + 1];
-	std::memcpy(line, this->values, this->size());
-	line[size()] = symbol;
-	line[size() + 1] = 0;
-	String result(line);
-	return result;
+	String b(&symbol);
+	return(*this + b);
 }
 
-namespace mipt {
-	String operator+(const char *temp, const String &str) {
-		int length = strlen(temp);
-		char *line = new char[str.size() + length + 1];
-		for (int i = 0; i < str.size(); i++) {
-			line[i] = temp[i];
-		}
-		for (int i = str.size(); i < str.size() + length; i++) {
-			line[i] = str.values[i - str.size()];
-		}
-		line[str.size() + length] = 0;
-		String result(line);
-		return result;
-	}
+mipt::String mipt::operator+(const char *temp, const mipt::String &str) {
+	mipt::String res(temp);
+	return res + str;
 }
 
 char &mipt::String::operator[] (const int number) const {
@@ -177,20 +130,13 @@ mipt::String &mipt::String::operator=(const char *temp) {
 }
 
 mipt::String &mipt::String::operator=(const char temp) {
-	char *res = new char[2];
-	res[0] = temp;
-	res[1] = 0;
-	delete[]this->values;
-	this->values = res;
-	this->capacity = 2;
+	this->operator=(&temp);
 	return *this;
 }
 
 namespace mipt {
 	std::ostream &operator<<(std::ostream &os, const String &temp) {
-		for (int i = 0; i < temp.size(); i++) {
-			os << temp.values[i];
-		}
+		os << temp.values;
 		return os;
 	}
 	std::istream &operator >> (std::istream &is, const String &temp) {

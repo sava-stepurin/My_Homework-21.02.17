@@ -6,14 +6,14 @@ namespace mipt {
 		char *values;
 		size_t capacity;
 	public :
-		String();
+		String(int cap = 1);
 		String(const char *);
 		String(const String &);
 		~String();
 		void print();
 		size_t size() const;
 		size_t find(const char);
-		void resize();
+		void resize(int newcapacity);
 		String &append(const char);
 		String &append(const char *);
 		String &append(const String &);
