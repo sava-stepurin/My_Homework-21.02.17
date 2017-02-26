@@ -5,6 +5,7 @@ namespace mipt {
 	private:
 		char *values;
 		size_t capacity;
+		void set_capacity(int capacity);
 	public :
 		String(int cap = 1);
 		String(const char *);

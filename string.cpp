@@ -1,22 +1,24 @@
 #include "string.h"
 
-mipt::String::String(int cap) {
-	values = new char[cap];
-	capacity = cap;
-	values[0] = 0;
+void mipt::String::set_capacity(int capacity) {
+	this->capacity = capacity;
+	this->values = new char[capacity];
+}
+
+mipt::String::String(int capacity) {
+	this->set_capacity(capacity);
+	this->values[0] = 0;
 }
 
 mipt::String::String(const char *temp) {
 	int size = strlen(temp);
-	values = new char[size + 1];
-	capacity = size + 1;
+	this->set_capacity(size + 1);
 	std::memcpy(values, temp, size);
 	values[size] = 0;
 }
 
 mipt::String::String(const String &that) {
-	this->capacity = that.size() + 1;
-	this->values = new char[that.size() + 1];
+	this->set_capacity(that.size() + 1);
 	std::memcpy(values, that.values, that.size());
 	this->values[that.size()] = 0;
 }
@@ -26,8 +28,7 @@ mipt::String::~String() {
 }
 
 void mipt::String::print() {
-	std::cout << this->values;
-	std::cout << std::endl;
+	std::cout << this->values << std::endl;
 }
 
 size_t mipt::String::size() const {
@@ -36,10 +37,11 @@ size_t mipt::String::size() const {
 
 size_t mipt::String::find(const char temp) {
 	size_t res = 0;
-	for (int i = 0; i < size(); i++) {
+	bool flag = false;
+	for (int i = 0; (i < size()) && (flag == false); i++) {
 		if (values[i] == temp) {
 			res = i;
-			break;
+			flag = true;
 		}
 	}
 	return res;
@@ -47,9 +49,7 @@ size_t mipt::String::find(const char temp) {
 
 void mipt::String::resize(int newcapacity) {
 	char *temp = new char[newcapacity];
-	for (int i = 0; i < this->size(); i++) {
-		temp[i] = this->values[i];
-	}
+	std::memcpy(temp, this->values, this->size());
 	temp[this->size()] = 0;
 	delete[]this->values;
 	this->values = temp;
@@ -119,9 +119,7 @@ char &mipt::String::operator[] (const int number) const {
 mipt::String &mipt::String::operator=(const char *temp) {
 	int sum = strlen(temp);
 	char *res = new char[sum + 1];
-	for (int i = 0; i < sum; i++) {
-		res[i] = temp[i];
-	}
+	std::memcpy(res, temp, sum);
 	res[sum] = 0;
 	delete[]this->values;
 	this->values = res;
